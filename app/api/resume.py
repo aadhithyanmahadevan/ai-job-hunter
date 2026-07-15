@@ -1,6 +1,10 @@
-from fastapi import APIRouter, UploadFile, File
-import shutil
 from pathlib import Path
+import shutil
+
+from fastapi import APIRouter, File, UploadFile
+
+from app.resumes.parser import ResumeParser
+from app.resumes.extractor import ResumeExtractor
 
 router = APIRouter(prefix="/resume", tags=["Resume"])
 
@@ -15,7 +19,14 @@ async def upload_resume(file: UploadFile = File(...)):
     with destination.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    parser = ResumeParser()
+    text = parser.parse(str(destination))
+
+    extractor = ResumeExtractor()
+    skills = extractor.extract_skills(text)
+
     return {
-        "message": "Resume uploaded successfully",
         "filename": file.filename,
+        "pages_text_length": len(text),
+        "skills": skills
     }

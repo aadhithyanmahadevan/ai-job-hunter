@@ -1,15 +1,37 @@
 import re
 
 SKILLS = [
-    "Python",
     "Java",
+    "Python",
+    "Spring Boot",
+    "Spring",
+    "SQL",
+    "MySQL",
+    "PostgreSQL",
     "Selenium",
     "Playwright",
-    "AWS",
+    "Cypress",
+    "JUnit",
+    "TestNG",
+    "REST",
+    "REST API",
+    "GraphQL",
     "Docker",
-    "SQL",
+    "Kubernetes",
+    "AWS",
+    "Azure",
+    "GCP",
+    "Git",
+    "GitHub",
+    "Jenkins",
+    "CI/CD",
     "FastAPI",
-    "Spring Boot",
+    "Kafka",
+    "Redis",
+    "MongoDB",
+    "Linux",
+    "Maven",
+    "Gradle"
 ]
 
 
