@@ -13,8 +13,14 @@ class Settings:
     APP_VERSION = "1.0.0"
 
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-    JSEARCH_API_KEY = os.getenv("JSEARCH_API_KEY", "")
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///data/jobs.db")
+
+    ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID", "")
+    ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")
+
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///data/jobs.db"
+    )
 
 
 settings = Settings()

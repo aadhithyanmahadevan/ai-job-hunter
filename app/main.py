@@ -4,6 +4,7 @@ from app.api.jobs import router as jobs_router
 from app.config.settings import settings
 from app.database.models import Base
 from app.database.session import engine
+from app.api.resume import router as resume_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(jobs_router)
+app.include_router(resume_router)
 
 
 @app.get("/")
