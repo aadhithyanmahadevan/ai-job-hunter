@@ -1,12 +1,16 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
+from app.providers.gemini_provider import GeminiProvider
 from app.resumes.parser import ResumeParser
-from app.resumes.extractor import ResumeExtractor
+from app.services.state import state
 
-router = APIRouter(prefix="/resume", tags=["Resume"])
+router = APIRouter(
+    prefix="/resume",
+    tags=["Resume"],
+)
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -14,19 +18,36 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 @router.post("/upload")
 async def upload_resume(file: UploadFile = File(...)):
-    destination = UPLOAD_DIR / file.filename
 
-    with destination.open("wb") as buffer:
+    filepath = UPLOAD_DIR / file.filename
+
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "message": "Resume uploaded successfully.",
+        "filename": file.filename,
+        "path": str(filepath),
+    }
+
+
+@router.post("/analyze")
+async def analyze_resume(file: UploadFile = File(...)):
+
+    filepath = UPLOAD_DIR / file.filename
+
+    with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     parser = ResumeParser()
-    text = parser.parse(str(destination))
 
-    extractor = ResumeExtractor()
-    skills = extractor.extract_skills(text)
+    resume_text = parser.extract_text(str(filepath))
 
-    return {
-        "filename": file.filename,
-        "pages_text_length": len(text),
-        "skills": skills
-    }
+    ai = GeminiProvider()
+
+    result = ai.analyze_resume(resume_text)
+
+    # Save analyzed resume in memory
+    state.resume = result
+
+    return result

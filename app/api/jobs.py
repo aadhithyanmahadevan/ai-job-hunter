@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.agents.search_agent import JobSearchAgent
-from app.database.dependencies import get_db
-from app.database.repository import JobRepository
+from app.database.session import get_db
 
 router = APIRouter(
     prefix="/jobs",
@@ -12,16 +11,21 @@ router = APIRouter(
 
 
 @router.get("/search")
-def search_jobs(db: Session = Depends(get_db)):
+def search_jobs(
+    db: Session = Depends(get_db),
+):
 
-    agent = JobSearchAgent(db)
+    try:
 
-    return agent.search()
+        agent = JobSearchAgent(db)
 
+        result = agent.search()
 
-@router.get("/")
-def get_jobs(db: Session = Depends(get_db)):
+        return result
 
-    repo = JobRepository(db)
+    except Exception as e:
 
-    return repo.get_all()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
