@@ -8,6 +8,6 @@ class JobDTO:
     location: str
     description: str
     salary_min: float | None
-    salary_max: float |None
+    salary_max: float | None
     url: str
     source: str

@@ -29,11 +29,7 @@ class ResumeRepository:
         self,
         resume_id: int,
     ):
-        return (
-            self.db.query(Resume)
-            .filter(Resume.id == resume_id)
-            .first()
-        )
+        return self.db.query(Resume).filter(Resume.id == resume_id).first()
 
     def get_by_user(
         self,
@@ -54,7 +50,4 @@ class ResumeRepository:
         self.db.commit()
 
     def count(self):
-        return (
-            self.db.query(Resume)
-            .count()
-        )
+        return self.db.query(Resume).count()

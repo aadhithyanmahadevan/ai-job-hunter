@@ -32,9 +32,7 @@ class JobSearchAgent:
 
             try:
 
-                job_hash = JobSkillCache.get_hash(
-                    normalized.description
-                )
+                job_hash = JobSkillCache.get_hash(normalized.description)
 
                 if JobSkillCache.exists(job_hash):
 
@@ -46,14 +44,9 @@ class JobSearchAgent:
 
                     print("Extracting skills using Gemini")
 
-                    extracted = self.ai.extract_job_skills(
-                        normalized.description
-                    )
+                    extracted = self.ai.extract_job_skills(normalized.description)
 
-                    JobSkillCache.save(
-                        job_hash,
-                        extracted
-                    )
+                    JobSkillCache.save(job_hash, extracted)
 
                 skills = extracted.get("skills", [])
 
@@ -67,13 +60,9 @@ class JobSearchAgent:
             # Salary Formatting
             # ------------------------------------------
 
-            if (
-                normalized.salary_min is not None
-                and normalized.salary_max is not None
-            ):
+            if normalized.salary_min is not None and normalized.salary_max is not None:
                 salary = (
-                    f"₹{normalized.salary_min:,.0f} - "
-                    f"₹{normalized.salary_max:,.0f}"
+                    f"₹{normalized.salary_min:,.0f} - " f"₹{normalized.salary_max:,.0f}"
                 )
 
             elif normalized.salary_min is not None:

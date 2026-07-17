@@ -10,9 +10,7 @@ class JobSkillCache:
 
     @staticmethod
     def get_hash(description: str) -> str:
-        return hashlib.sha256(
-            description.encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(description.encode("utf-8")).hexdigest()
 
     @staticmethod
     def get_file(hash_value: str) -> Path:
@@ -25,29 +23,13 @@ class JobSkillCache:
     @classmethod
     def load(cls, hash_value: str):
 
-        with open(
-            cls.get_file(hash_value),
-            "r",
-            encoding="utf-8"
-        ) as f:
+        with open(cls.get_file(hash_value), "r", encoding="utf-8") as f:
 
             return json.load(f)
 
     @classmethod
-    def save(
-        cls,
-        hash_value: str,
-        data: dict
-    ):
+    def save(cls, hash_value: str, data: dict):
 
-        with open(
-            cls.get_file(hash_value),
-            "w",
-            encoding="utf-8"
-        ) as f:
+        with open(cls.get_file(hash_value), "w", encoding="utf-8") as f:
 
-            json.dump(
-                data,
-                f,
-                indent=4
-            )
+            json.dump(data, f, indent=4)

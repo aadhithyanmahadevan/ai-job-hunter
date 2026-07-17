@@ -9,9 +9,7 @@ class ResumeResponse(BaseModel):
     status: str
     uploaded_at: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class ResumeDetail(BaseModel):
@@ -21,9 +19,7 @@ class ResumeDetail(BaseModel):
     status: str
     uploaded_at: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class ResumeUploadResponse(BaseModel):

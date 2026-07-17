@@ -31,7 +31,7 @@ SKILLS = [
     "MongoDB",
     "Linux",
     "Maven",
-    "Gradle"
+    "Gradle",
 ]
 
 

@@ -2,7 +2,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 CACHE_DIR = Path("cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
@@ -11,9 +10,7 @@ class ResumeCache:
 
     @staticmethod
     def get_hash(text: str) -> str:
-        return hashlib.sha256(
-            text.encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
     @staticmethod
     def cache_path(hash_value: str) -> Path:

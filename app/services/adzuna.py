@@ -29,9 +29,7 @@ class AdzunaProvider:
             url,
             params=params,
             timeout=30,
-            headers={
-                "Accept": "application/json"
-            },
+            headers={"Accept": "application/json"},
         )
 
         response.raise_for_status()

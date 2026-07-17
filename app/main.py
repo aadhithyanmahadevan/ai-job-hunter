@@ -1,11 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.core.exceptions import NotFoundException
 from app.config.settings import settings
-from app.database.base import Base
-from app.database.session import engine
 
 # Register all SQLAlchemy models
 import app.models
@@ -18,13 +18,16 @@ from app.api.match import router as match_router
 from app.api.resume import router as resume_router
 from app.api.users import router as users_router
 
+# -------------------------------------------------
+# Lifespan
+# -------------------------------------------------
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Startup tasks.
     """
-    Base.metadata.create_all(bind=engine)
 
     yield
 
@@ -34,11 +37,31 @@ async def lifespan(app: FastAPI):
     # Close connections, clear cache, etc. if needed
 
 
+# -------------------------------------------------
+# FastAPI App
+# -------------------------------------------------
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     lifespan=lifespan,
 )
+
+
+# -------------------------------------------------
+# Exception Handlers
+# -------------------------------------------------
+
+
+@app.exception_handler(NotFoundException)
+async def not_found_handler(
+    request: Request,
+    exc: NotFoundException,
+):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 # -------------------------------------------------
@@ -74,10 +97,8 @@ app.include_router(interview_router)
 # Root
 # -------------------------------------------------
 
-@app.get(
-    "/",
-    tags=["System"],
-)
+
+@app.get("/", tags=["System"])
 def home():
     return {
         "application": settings.APP_NAME,
@@ -90,10 +111,8 @@ def home():
 # Health Check
 # -------------------------------------------------
 
-@app.get(
-    "/health",
-    tags=["System"],
-)
+
+@app.get("/health", tags=["System"])
 def health():
     return {
         "status": "healthy",

@@ -20,15 +20,9 @@ class Settings:
     ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
     ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
-    DATABASE_URL = os.getenv(
-        "DATABASE_URL",
-        "sqlite:///data/jobs.db"
-    )
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///data/jobs.db")
 
-    JWT_SECRET_KEY = os.getenv(
-        "JWT_SECRET_KEY",
-        "change-this-in-production"
-    )
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-in-production")
 
     JWT_ALGORITHM = "HS256"
 

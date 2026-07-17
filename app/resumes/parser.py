@@ -34,7 +34,4 @@ class ResumeParser:
 
         doc = docx.Document(filepath)
 
-        return "\n".join(
-            p.text
-            for p in doc.paragraphs
-        )
+        return "\n".join(p.text for p in doc.paragraphs)

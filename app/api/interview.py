@@ -20,9 +20,7 @@ def interview_questions(request: InterviewRequest):
 
         ai = GeminiProvider()
 
-        result = ai.generate_interview_questions(
-            request.description
-        )
+        result = ai.generate_interview_questions(request.description)
 
         return {
             "success": True,

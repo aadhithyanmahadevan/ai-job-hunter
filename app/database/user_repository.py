@@ -21,28 +21,16 @@ class UserRepository:
         self,
         user_id: int,
     ):
-        return (
-            self.db.query(User)
-            .filter(User.id == user_id)
-            .first()
-        )
+        return self.db.query(User).filter(User.id == user_id).first()
 
     def get_by_email(
         self,
         email: str,
     ):
-        return (
-            self.db.query(User)
-            .filter(User.email == email)
-            .first()
-        )
+        return self.db.query(User).filter(User.email == email).first()
 
     def get_all(self):
-        return (
-            self.db.query(User)
-            .order_by(User.id)
-            .all()
-        )
+        return self.db.query(User).order_by(User.id).all()
 
     def update(
         self,
@@ -60,7 +48,4 @@ class UserRepository:
         self.db.commit()
 
     def count(self):
-        return (
-            self.db.query(User)
-            .count()
-        )
+        return self.db.query(User).count()

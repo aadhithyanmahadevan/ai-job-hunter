@@ -8,9 +8,7 @@ from app.config.settings import settings
 class GeminiProvider:
 
     def __init__(self):
-        self.client = genai.Client(
-            api_key=settings.GEMINI_API_KEY
-        )
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
         self.models = [
             "models/gemini-3.5-flash",
@@ -29,7 +27,7 @@ class GeminiProvider:
     def _generate(self, prompt: str):
 
         ordered_models = (
-            self.models[self.last_working_index:]
+            self.models[self.last_working_index :]
             + self.models[: self.last_working_index]
         )
 
@@ -52,9 +50,7 @@ class GeminiProvider:
 
                 last_error = e
 
-        raise RuntimeError(
-            f"All Gemini models failed: {last_error}"
-        )
+        raise RuntimeError(f"All Gemini models failed: {last_error}")
 
     # ---------------------------------------------------------
     # Helper
@@ -62,12 +58,7 @@ class GeminiProvider:
 
     def ask(self, prompt: str):
 
-        return (
-            self._generate(prompt)
-            .replace("```json", "")
-            .replace("```", "")
-            .strip()
-        )
+        return self._generate(prompt).replace("```json", "").replace("```", "").strip()
 
     # ---------------------------------------------------------
     # Resume Analysis
@@ -109,9 +100,7 @@ Resume:
 
         except Exception:
 
-            return {
-                "raw_response": response
-            }
+            return {"raw_response": response}
 
     # ---------------------------------------------------------
     # Extract Job Skills
@@ -135,15 +124,11 @@ Job Description:
 
         try:
 
-            return json.loads(
-                self.ask(prompt)
-            )
+            return json.loads(self.ask(prompt))
 
         except Exception:
 
-            return {
-                "skills": []
-            }
+            return {"skills": []}
 
     # ---------------------------------------------------------
     # Interview Questions
@@ -170,9 +155,7 @@ Job Description:
 
         try:
 
-            return json.loads(
-                self.ask(prompt)
-            )
+            return json.loads(self.ask(prompt))
 
         except Exception:
 
@@ -212,9 +195,7 @@ Job Description:
 
         try:
 
-            return json.loads(
-                self.ask(prompt)
-            )
+            return json.loads(self.ask(prompt))
 
         except Exception:
 
@@ -248,9 +229,7 @@ Resume:
 
         try:
 
-            return json.loads(
-                self.ask(prompt)
-            )
+            return json.loads(self.ask(prompt))
 
         except Exception:
 
@@ -282,9 +261,7 @@ Missing Skills:
 
         try:
 
-            return json.loads(
-                self.ask(prompt)
-            )
+            return json.loads(self.ask(prompt))
 
         except Exception:
 

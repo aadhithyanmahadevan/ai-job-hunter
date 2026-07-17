@@ -40,9 +40,7 @@ def register(
         hashed_password=hash_password(user.password),
     )
 
-    logger.info(
-    f"New user registration: {user.email}"
-)
+    logger.info(f"User login: {user.email}")
 
     return repo.create(new_user)
 
@@ -80,9 +78,6 @@ def login(
             "user_id": user.id,
         }
     )
-    logger.info(
-    f"New user registration: {user.email}"
-)
 
     return TokenResponse(
         access_token=access_token,

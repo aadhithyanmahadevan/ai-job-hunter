@@ -16,7 +16,6 @@ from app.models.user import User
 from app.services.match_service import MatchService
 from app.core.logger import logger
 
-
 router = APIRouter(
     prefix="/match",
     tags=["AI Job Matching"],
@@ -68,12 +67,8 @@ def match_resume_to_job(
         resume_id=resume.id,
         job_id=job.id,
         match_score=result.get("score", 0),
-        matched_skills=json.dumps(
-            result.get("strengths", [])
-        ),
-        missing_skills=json.dumps(
-            result.get("missing_skills", [])
-        ),
+        matched_skills=json.dumps(result.get("strengths", [])),
+        missing_skills=json.dumps(result.get("missing_skills", [])),
         recommendations=result.get(
             "recommendation",
             "",
@@ -137,9 +132,7 @@ def get_match_history(
             status_code=403,
             detail="Unauthorized",
         )
-    
-    logger.info(
-    f"Matching jobs for resume {resume_id}"
-    )
+
+    logger.info(f"Matching jobs for resume {resume_id}")
 
     return match_repo.get_by_resume(resume_id)

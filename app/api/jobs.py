@@ -23,9 +23,7 @@ def search_jobs(
 
         result = agent.search()
 
-        logger.info(
-    "Searching jobs..."
-)
+        logger.info("Searching jobs...")
 
         return result
 

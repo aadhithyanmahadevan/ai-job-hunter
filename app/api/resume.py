@@ -49,9 +49,7 @@ async def upload_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    logger.info(
-        f"User '{current_user.email}' is uploading a resume."
-    )
+    logger.info(f"User '{current_user.email}' is uploading a resume.")
 
     resume_repo = ResumeRepository(db)
 
@@ -68,9 +66,7 @@ async def upload_resume(
 
         resume = resume_repo.create(resume)
 
-        logger.info(
-            f"Resume uploaded successfully. Resume ID: {resume.id}"
-        )
+        logger.info(f"Resume uploaded successfully. Resume ID: {resume.id}")
 
         return {
             "success": True,
@@ -80,9 +76,7 @@ async def upload_resume(
         }
 
     except Exception as e:
-        logger.exception(
-            f"Resume upload failed for user '{current_user.email}'."
-        )
+        logger.exception(f"Resume upload failed for user '{current_user.email}'.")
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -118,23 +112,17 @@ async def analyze_resume(
     )
 
     try:
-        logger.info(
-            f"Starting analysis for resume {resume.id}."
-        )
+        logger.info(f"Starting analysis for resume {resume.id}.")
 
         resume.status = "analyzing"
         resume_repo.update(resume)
 
-        extracted_text = ResumeService.extract_resume(
-            resume.file_path
-        )
+        extracted_text = ResumeService.extract_resume(resume.file_path)
 
         resume.extracted_text = extracted_text
         resume_repo.update(resume)
 
-        analysis_result = ResumeService.analyze_with_cache(
-            extracted_text
-        )
+        analysis_result = ResumeService.analyze_with_cache(extracted_text)
 
         resume.status = "completed"
         resume_repo.update(resume)
@@ -142,23 +130,15 @@ async def analyze_resume(
         analysis = ResumeAnalysis(
             resume_id=resume.id,
             ats_score=analysis_result.get("ats_score"),
-            strengths=json.dumps(
-                analysis_result.get("strengths", [])
-            ),
-            missing_skills=json.dumps(
-                analysis_result.get("missing_skills", [])
-            ),
-            suggestions=json.dumps(
-                analysis_result.get("suggestions", [])
-            ),
+            strengths=json.dumps(analysis_result.get("strengths", [])),
+            missing_skills=json.dumps(analysis_result.get("missing_skills", [])),
+            suggestions=json.dumps(analysis_result.get("suggestions", [])),
             raw_json=json.dumps(analysis_result),
         )
 
         analysis_repo.create(analysis)
 
-        logger.info(
-            f"Analysis completed successfully for resume {resume.id}."
-        )
+        logger.info(f"Analysis completed successfully for resume {resume.id}.")
 
         return {
             "success": True,
@@ -167,9 +147,7 @@ async def analyze_resume(
         }
 
     except Exception as e:
-        logger.exception(
-            f"Resume analysis failed for resume {resume_id}."
-        )
+        logger.exception(f"Resume analysis failed for resume {resume_id}.")
 
         resume.status = "failed"
         resume_repo.update(resume)
@@ -190,9 +168,7 @@ def get_resumes(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    logger.info(
-        f"Fetching resumes for user '{current_user.email}'."
-    )
+    logger.info(f"Fetching resumes for user '{current_user.email}'.")
 
     resume_repo = ResumeRepository(db)
 
@@ -210,9 +186,7 @@ def get_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    logger.info(
-        f"Fetching resume {resume_id}."
-    )
+    logger.info(f"Fetching resume {resume_id}.")
 
     resume_repo = ResumeRepository(db)
     analysis_repo = AnalysisRepository(db)
@@ -266,18 +240,14 @@ def delete_resume(
         current_user,
     )
 
-    logger.info(
-        f"Deleting resume {resume.id}."
-    )
+    logger.info(f"Deleting resume {resume.id}.")
 
     if os.path.exists(resume.file_path):
         os.remove(resume.file_path)
 
     resume_repo.delete(resume)
 
-    logger.info(
-        f"Resume {resume.id} deleted successfully."
-    )
+    logger.info(f"Resume {resume.id} deleted successfully.")
 
     return {
         "success": True,

@@ -15,11 +15,7 @@ class MatchRepository:
         return match
 
     def get(self, match_id: int):
-        return (
-            self.db.query(Match)
-            .filter(Match.id == match_id)
-            .first()
-        )
+        return self.db.query(Match).filter(Match.id == match_id).first()
 
     def get_by_resume(self, resume_id: int):
         return (
@@ -34,11 +30,7 @@ class MatchRepository:
         self.db.commit()
 
     def delete_by_resume(self, resume_id: int):
-        (
-            self.db.query(Match)
-            .filter(Match.resume_id == resume_id)
-            .delete()
-        )
+        (self.db.query(Match).filter(Match.resume_id == resume_id).delete())
         self.db.commit()
 
     def count(self):

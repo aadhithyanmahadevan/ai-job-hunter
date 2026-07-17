@@ -61,12 +61,8 @@ class MatchService:
                 resume_id=resume.id,
                 job_id=job.id,
                 match_score=result.get("score", 0),
-                matched_skills=json.dumps(
-                    result.get("strengths", [])
-                ),
-                missing_skills=json.dumps(
-                    result.get("missing_skills", [])
-                ),
+                matched_skills=json.dumps(result.get("strengths", [])),
+                missing_skills=json.dumps(result.get("missing_skills", [])),
                 recommendations=result.get(
                     "recommendation",
                     "",

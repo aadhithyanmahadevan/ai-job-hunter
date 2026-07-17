@@ -47,7 +47,5 @@ class DashboardService:
             "average_match": round(sum(scores) / len(scores), 2),
             "highest_match": max(scores),
             "lowest_match": min(scores),
-            "top_missing_skills": [
-                skill for skill, _ in counter.most_common(10)
-            ],
+            "top_missing_skills": [skill for skill, _ in counter.most_common(10)],
         }

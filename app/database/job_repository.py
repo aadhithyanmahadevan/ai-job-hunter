@@ -8,13 +8,11 @@ class JobRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def get(self, job_id: int):
+        return self.db.query(Job).filter(Job.id == job_id).first()
+
     def exists(self, url: str):
-        return (
-            self.db.query(Job)
-            .filter(Job.url == url)
-            .first()
-            is not None
-        )
+        return self.db.query(Job).filter(Job.url == url).first() is not None
 
     def save(self, job: Job):
         self.db.add(job)

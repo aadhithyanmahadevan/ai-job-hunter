@@ -30,12 +30,8 @@ class AnalysisRepository:
     ):
         return (
             self.db.query(ResumeAnalysis)
-            .filter(
-                ResumeAnalysis.resume_id == resume_id
-            )
-            .order_by(
-                ResumeAnalysis.created_at.desc()
-            )
+            .filter(ResumeAnalysis.resume_id == resume_id)
+            .order_by(ResumeAnalysis.created_at.desc())
             .first()
         )
 
@@ -45,12 +41,8 @@ class AnalysisRepository:
     ):
         return (
             self.db.query(ResumeAnalysis)
-            .filter(
-                ResumeAnalysis.resume_id == resume_id
-            )
-            .order_by(
-                ResumeAnalysis.created_at.desc()
-            )
+            .filter(ResumeAnalysis.resume_id == resume_id)
+            .order_by(ResumeAnalysis.created_at.desc())
             .all()
         )
 
@@ -62,7 +54,4 @@ class AnalysisRepository:
         self.db.commit()
 
     def count(self):
-        return (
-            self.db.query(ResumeAnalysis)
-            .count()
-        )
+        return self.db.query(ResumeAnalysis).count()
