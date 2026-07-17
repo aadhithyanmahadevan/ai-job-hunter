@@ -1,26 +1,50 @@
-# Environment
-.env
-
 # Python
-.venv/
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.so
 
-# Cache
-cache/
-uploads/
+# Virtual Environment
+.venv/
+venv/
+env/
 
-# Database
-*.db
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
 
-# Frontend
-node_modules/
-dist/
+# Ruff
+.ruff_cache/
 
-# macOS
-.DS_Store
+# MyPy
+.mypy_cache/
+.cache/
 
 # IDE
 .vscode/
 .idea/
+
+# macOS
+.DS_Store
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Alembic
+alembic.ini.bak
