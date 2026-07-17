@@ -25,5 +25,14 @@ class Settings:
         "sqlite:///data/jobs.db"
     )
 
+    JWT_SECRET_KEY = os.getenv(
+        "JWT_SECRET_KEY",
+        "change-this-in-production"
+    )
+
+    JWT_ALGORITHM = "HS256"
+
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 settings = Settings()

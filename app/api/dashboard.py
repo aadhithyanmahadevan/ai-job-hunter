@@ -1,6 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from app.services.state import state
+from app.core.dependencies import get_current_user
+from app.database.session import get_db
+
+from app.database.resume_repository import ResumeRepository
+from app.models.user import User
+
+from app.services.dashboard_service import DashboardService
+
 
 router = APIRouter(
     prefix="/dashboard",
@@ -8,46 +16,29 @@ router = APIRouter(
 )
 
 
-@router.get("/summary")
-def dashboard_summary():
+@router.get("/{resume_id}")
+def dashboard_summary(
+    resume_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
 
-    if state.resume is None:
-        return {
-            "resumeScore": 0,
-            "skills": 0,
-            "projects": 0,
-            "certifications": 0,
-            "strengths": [],
-            "missingSkills": [],
-            "resume": None,
-        }
+    resume_repo = ResumeRepository(db)
 
-    resume = state.resume
+    resume = resume_repo.get(resume_id)
 
-    score = 0
+    if not resume:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found",
+        )
 
-    score += min(len(resume["skills"]) * 2, 40)
-    score += min(len(resume["projects"]) * 5, 20)
-    score += min(len(resume["certifications"]) * 5, 15)
-    score += min(len(resume["education"]) * 10, 10)
-    score -= min(len(resume["missing_skills"]) * 2, 15)
+    if resume.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Unauthorized",
+        )
 
-    score = max(0, min(score, 100))
+    service = DashboardService(db)
 
-    return {
-
-        "resumeScore": score,
-
-        "skills": len(resume["skills"]),
-
-        "projects": len(resume["projects"]),
-
-        "certifications": len(resume["certifications"]),
-
-        "strengths": resume["strengths"],
-
-        "missingSkills": resume["missing_skills"],
-
-        "resume": resume,
-
-    }
+    return service.get_dashboard(resume_id)

@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.agents.search_agent import JobSearchAgent
 from app.database.session import get_db
 
+from app.core.logger import logger
+
 router = APIRouter(
     prefix="/jobs",
     tags=["Jobs"],
@@ -20,6 +22,10 @@ def search_jobs(
         agent = JobSearchAgent(db)
 
         result = agent.search()
+
+        logger.info(
+    "Searching jobs..."
+)
 
         return result
 

@@ -6,8 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
 
-class Match(Base):
-    __tablename__ = "matches"
+class ResumeAnalysis(Base):
+    __tablename__ = "resume_analysis"
 
     id: Mapped[int] = mapped_column(
         Integer,
@@ -20,17 +20,12 @@ class Match(Base):
         nullable=False,
     )
 
-    job_id: Mapped[int] = mapped_column(
-        ForeignKey("jobs.id"),
-        nullable=False,
-    )
-
-    match_score: Mapped[int] = mapped_column(
+    ats_score: Mapped[int] = mapped_column(
         Integer,
         default=0,
     )
 
-    matched_skills: Mapped[str] = mapped_column(
+    strengths: Mapped[str] = mapped_column(
         Text,
         default="[]",
     )
@@ -40,14 +35,13 @@ class Match(Base):
         default="[]",
     )
 
-    recommendations: Mapped[str] = mapped_column(
+    suggestions: Mapped[str] = mapped_column(
         Text,
-        default="",
+        default="[]",
     )
 
     raw_json: Mapped[str] = mapped_column(
         Text,
-        default="{}",
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -57,10 +51,5 @@ class Match(Base):
 
     resume = relationship(
         "Resume",
-        lazy="joined",
-    )
-
-    job = relationship(
-        "Job",
-        lazy="joined",
+        back_populates="analyses",
     )

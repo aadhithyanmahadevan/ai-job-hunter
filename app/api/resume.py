@@ -1,144 +1,285 @@
-import shutil
-import traceback
-from pathlib import Path
+import json
+import os
 
-from fastapi import APIRouter, UploadFile, File
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+)
+from sqlalchemy.orm import Session
 
-from app.providers.gemini_provider import GeminiProvider
-from app.resumes.parser import ResumeParser
-from app.services.state import state
-from app.services.resume_cache import ResumeCache
+from app.core.dependencies import get_current_user
+from app.core.logger import logger
+from app.database.analysis_repository import AnalysisRepository
+from app.database.resume_repository import ResumeRepository
+from app.database.session import get_db
+from app.models.resume import Resume
+from app.models.resume_analysis import ResumeAnalysis
+from app.models.user import User
+from app.services.resume_service import ResumeService
 
 router = APIRouter(
     prefix="/resume",
     tags=["Resume"],
 )
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+
+def validate_resume_owner(
+    resume: Resume,
+    current_user: User,
+):
+    if resume.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized",
+        )
+
+
+# --------------------------------------------------------
+# Upload Resume
+# --------------------------------------------------------
 
 
 @router.post("/upload")
-async def upload_resume(file: UploadFile = File(...)):
+async def upload_resume(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    logger.info(
+        f"User '{current_user.email}' is uploading a resume."
+    )
 
-    filepath = UPLOAD_DIR / file.filename
-
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    return {
-        "success": True,
-        "message": "Resume uploaded successfully.",
-        "filename": file.filename,
-        "path": str(filepath),
-    }
-
-
-@router.post("/analyze")
-async def analyze_resume(file: UploadFile = File(...)):
+    resume_repo = ResumeRepository(db)
 
     try:
+        filename, filepath = ResumeService.save_file(file)
 
-        # ----------------------------------------
-        # Save uploaded resume
-        # ----------------------------------------
-
-        filepath = UPLOAD_DIR / file.filename
-
-        with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        # ----------------------------------------
-        # Extract text
-        # ----------------------------------------
-
-        parser = ResumeParser()
-
-        resume_text = parser.extract_text(str(filepath))
-
-        if not resume_text.strip():
-
-            return {
-                "success": False,
-                "error": "Unable to extract text from the resume."
-            }
-
-        # ----------------------------------------
-        # AI Analysis
-        # ----------------------------------------
-
-        resume_hash = ResumeCache.get_hash(
-            resume_text
+        resume = Resume(
+            user_id=current_user.id,
+            filename=filename,
+            file_path=filepath,
+            extracted_text="",
+            status="uploaded",
         )
 
-        if ResumeCache.exists(resume_hash):
+        resume = resume_repo.create(resume)
 
-            print("Loaded resume from cache")
-
-            result = ResumeCache.load(
-                resume_hash
-            )
-
-        else:
-
-            print("Analyzing resume with Gemini")
-
-            ai = GeminiProvider()
-
-            result = ai.analyze_resume(
-                resume_text
-            )
-
-            ResumeCache.save(
-                resume_hash,
-                result
-            )
-
-        state.resume = result
+        logger.info(
+            f"Resume uploaded successfully. Resume ID: {resume.id}"
+        )
 
         return {
             "success": True,
-            "data": result
+            "resume_id": resume.id,
+            "filename": resume.filename,
+            "message": "Resume uploaded successfully",
         }
 
     except Exception as e:
+        logger.exception(
+            f"Resume upload failed for user '{current_user.email}'."
+        )
 
-        print("=" * 80)
-        print("Resume Analysis Error")
-        print("=" * 80)
-        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )
 
-        error = str(e)
 
-        # ----------------------------------------
-        # Gemini Quota
-        # ----------------------------------------
+# --------------------------------------------------------
+# Analyze Resume
+# --------------------------------------------------------
 
-        if "429" in error or "RESOURCE_EXHAUSTED" in error:
 
-            return {
-                "success": False,
-                "error": "Gemini API quota exceeded.",
-                "message": "Please wait a few seconds and try again, or use a different API key.",
-                "retry": True
-            }
+@router.post("/{resume_id}/analyze")
+async def analyze_resume(
+    resume_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    resume_repo = ResumeRepository(db)
+    analysis_repo = AnalysisRepository(db)
 
-        # ----------------------------------------
-        # Invalid API Key
-        # ----------------------------------------
+    resume = resume_repo.get(resume_id)
 
-        if "API_KEY" in error.upper():
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
 
-            return {
-                "success": False,
-                "error": "Invalid Gemini API Key."
-            }
+    validate_resume_owner(
+        resume,
+        current_user,
+    )
 
-        # ----------------------------------------
-        # Generic Error
-        # ----------------------------------------
+    try:
+        logger.info(
+            f"Starting analysis for resume {resume.id}."
+        )
+
+        resume.status = "analyzing"
+        resume_repo.update(resume)
+
+        extracted_text = ResumeService.extract_resume(
+            resume.file_path
+        )
+
+        resume.extracted_text = extracted_text
+        resume_repo.update(resume)
+
+        analysis_result = ResumeService.analyze_with_cache(
+            extracted_text
+        )
+
+        resume.status = "completed"
+        resume_repo.update(resume)
+
+        analysis = ResumeAnalysis(
+            resume_id=resume.id,
+            ats_score=analysis_result.get("ats_score"),
+            strengths=json.dumps(
+                analysis_result.get("strengths", [])
+            ),
+            missing_skills=json.dumps(
+                analysis_result.get("missing_skills", [])
+            ),
+            suggestions=json.dumps(
+                analysis_result.get("suggestions", [])
+            ),
+            raw_json=json.dumps(analysis_result),
+        )
+
+        analysis_repo.create(analysis)
+
+        logger.info(
+            f"Analysis completed successfully for resume {resume.id}."
+        )
 
         return {
-            "success": False,
-            "error": error
+            "success": True,
+            "resume_id": resume.id,
+            "analysis": analysis_result,
         }
+
+    except Exception as e:
+        logger.exception(
+            f"Resume analysis failed for resume {resume_id}."
+        )
+
+        resume.status = "failed"
+        resume_repo.update(resume)
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Resume analysis failed: {str(e)}",
+        )
+
+
+# --------------------------------------------------------
+# Get All Resumes
+# --------------------------------------------------------
+
+
+@router.get("/")
+def get_resumes(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    logger.info(
+        f"Fetching resumes for user '{current_user.email}'."
+    )
+
+    resume_repo = ResumeRepository(db)
+
+    return resume_repo.get_by_user(current_user.id)
+
+
+# --------------------------------------------------------
+# Get Resume Details
+# --------------------------------------------------------
+
+
+@router.get("/{resume_id}")
+def get_resume(
+    resume_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    logger.info(
+        f"Fetching resume {resume_id}."
+    )
+
+    resume_repo = ResumeRepository(db)
+    analysis_repo = AnalysisRepository(db)
+
+    resume = resume_repo.get(resume_id)
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    validate_resume_owner(
+        resume,
+        current_user,
+    )
+
+    analysis = analysis_repo.get_by_resume(
+        resume.id,
+    )
+
+    return {
+        "resume": resume,
+        "analysis": analysis,
+    }
+
+
+# --------------------------------------------------------
+# Delete Resume
+# --------------------------------------------------------
+
+
+@router.delete("/{resume_id}")
+def delete_resume(
+    resume_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    resume_repo = ResumeRepository(db)
+
+    resume = resume_repo.get(resume_id)
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    validate_resume_owner(
+        resume,
+        current_user,
+    )
+
+    logger.info(
+        f"Deleting resume {resume.id}."
+    )
+
+    if os.path.exists(resume.file_path):
+        os.remove(resume.file_path)
+
+    resume_repo.delete(resume)
+
+    logger.info(
+        f"Resume {resume.id} deleted successfully."
+    )
+
+    return {
+        "success": True,
+        "message": "Resume deleted successfully",
+    }

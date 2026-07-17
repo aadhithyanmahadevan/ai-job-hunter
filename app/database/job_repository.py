@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.database.models import Job
+from app.models.job import Job
 
 
 class JobRepository:
