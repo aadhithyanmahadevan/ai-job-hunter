@@ -5,6 +5,8 @@ from app.api.jobs import router as jobs_router
 from app.api.resume import router as resume_router
 from app.api.match import router as match_router
 from app.api.match_ai import router as ai_match_router
+from app.api.dashboard import router as dashboard_router
+from app.api.interview import router as interview_router
 
 from app.config.settings import settings
 from app.database.models import Base
@@ -38,7 +40,8 @@ app.include_router(jobs_router)
 app.include_router(resume_router)
 app.include_router(match_router)
 app.include_router(ai_match_router)
-
+app.include_router(dashboard_router)
+app.include_router(interview_router)
 
 @app.get("/")
 def home():

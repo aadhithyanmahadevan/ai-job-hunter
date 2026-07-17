@@ -1,32 +1,26 @@
 from fastapi import APIRouter, HTTPException
 
-from app.agents.matching_agent import MatchingAgent
 from app.services.state import state
+from app.services.matcher import AIMatcher
 
 router = APIRouter(
     prefix="/match",
-    tags=["AI Matching"],
+    tags=["Match"],
 )
 
 
-@router.get("/")
-def match_jobs():
+@router.post("/")
+def calculate_match(job: dict):
 
     if state.resume is None:
         raise HTTPException(
             status_code=400,
-            detail="Analyze a resume first."
+            detail="Resume not analyzed yet."
         )
 
-    if not state.jobs:
-        raise HTTPException(
-            status_code=400,
-            detail="Search jobs first."
-        )
-
-    agent = MatchingAgent()
-
-    return agent.match_jobs(
+    result = AIMatcher.calculate_match(
         state.resume,
-        state.jobs,
+        job.get("skills", [])
     )
+
+    return result

@@ -1,7 +1,10 @@
 import api from "./api";
 
-export async function getMatch() {
-  const response = await api.get("/ai/match");
+export async function getMatch(job: any) {
+  const response = await api.post(
+    "/match/",
+    job
+  );
 
   return response.data;
 }

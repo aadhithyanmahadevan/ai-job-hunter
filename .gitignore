@@ -1,0 +1,26 @@
+# Environment
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Cache
+cache/
+uploads/
+
+# Database
+*.db
+
+# Frontend
+node_modules/
+dist/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

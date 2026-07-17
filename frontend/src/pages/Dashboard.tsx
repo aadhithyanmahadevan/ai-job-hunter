@@ -1,47 +1,32 @@
-import { useResume } from "../context/ResumeContext";
-
 import StatCard from "../components/dashboard/StatCard";
-import SkillsChart from "../components/dashboard/SkillsChart";
 import ResumeSummary from "../components/dashboard/ResumeSummary";
+import SkillsChart from "../components/dashboard/SkillsChart";
 import RecentJobs from "../components/dashboard/RecentJobs";
 
 import Card from "../components/common/Card";
 
+import useDashboard from "../hooks/useDashboard";
+
 import {
   FileText,
   Briefcase,
-  Target,
   Award,
+  Target,
   Sparkles,
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { resume } = useResume();
 
-  const calculateResumeScore = () => {
-    if (!resume) return 0;
-
-    let score = 0;
-
-    score += Math.min(resume.skills.length * 2, 40);
-    score += Math.min(resume.projects.length * 5, 20);
-    score += Math.min(
-      resume.certifications.length * 5,
-      15
-    );
-    score += Math.min(
-      resume.education.length * 10,
-      10
-    );
-    score -= Math.min(
-      resume.missing_skills.length * 2,
-      15
-    );
-
-    return Math.max(0, Math.min(score, 100));
-  };
+  const {
+    resume,
+    resumeScore,
+    skillsCount,
+    projectsCount,
+    certificationsCount,
+  } = useDashboard();
 
   return (
+
     <div className="space-y-8">
 
       <div>
@@ -60,55 +45,41 @@ export default function Dashboard() {
 
         <StatCard
           title="Resume Score"
-          value={
-            resume
-              ? `${calculateResumeScore()}%`
-              : "--"
-          }
+          value={`${resumeScore}%`}
           icon={<FileText />}
         />
 
         <StatCard
           title="Skills"
-          value={
-            resume
-              ? resume.skills.length
-              : "--"
-          }
+          value={skillsCount}
           icon={<Target />}
         />
 
         <StatCard
           title="Projects"
-          value={
-            resume
-              ? resume.projects.length
-              : "--"
-          }
+          value={projectsCount}
           icon={<Briefcase />}
         />
 
         <StatCard
-          title="Certifications"
-          value={
-            resume
-              ? resume.certifications.length
-              : "--"
-          }
+          title="Certificates"
+          value={certificationsCount}
           icon={<Award />}
         />
 
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-6">
 
         <Card title="Skill Distribution">
-
           <SkillsChart />
-
         </Card>
 
         <ResumeSummary />
+
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
 
         <RecentJobs />
 
@@ -118,7 +89,7 @@ export default function Dashboard() {
 
             <div className="space-y-4">
 
-              {resume.missing_skills.map((skill) => (
+              {resume.missing_skills.map((skill: string) => (
 
                 <div
                   key={skill}
@@ -126,7 +97,7 @@ export default function Dashboard() {
                 >
 
                   <Sparkles
-                    size={20}
+                    size={18}
                     className="text-cyan-400"
                   />
 
@@ -143,7 +114,7 @@ export default function Dashboard() {
           ) : (
 
             <p className="text-slate-400">
-              Analyze your resume to get AI suggestions.
+              Analyze a resume to get AI suggestions.
             </p>
 
           )}
@@ -153,5 +124,7 @@ export default function Dashboard() {
       </div>
 
     </div>
+
   );
+
 }

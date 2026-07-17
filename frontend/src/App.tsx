@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Resume from "./pages/Resume";
 import Jobs from "./pages/Jobs";
 import Match from "./pages/Match";
+import Interview from "./pages/Interview";
+
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
               <Route path="/resume" element={<Resume />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/match" element={<Match />} />
+              <Route path="/interview" element={<Interview />}
+              />
             </Routes>
           </main>
         </div>
