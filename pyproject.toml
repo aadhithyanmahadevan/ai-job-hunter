@@ -1,0 +1,11 @@
+[tool.ruff]
+line-length = 88
+
+exclude = [
+    ".venv",
+    "__pycache__",
+    "alembic/versions",
+]
+
+[tool.black]
+line-length = 88
