@@ -13,13 +13,17 @@ services:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/ai_job_hunter
 
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+    restart: unless-stopped
 
   postgres:
     image: postgres:16
+
     container_name: postgres
 
-    restart: always
+    restart: unless-stopped
 
     environment:
       POSTGRES_DB: ai_job_hunter
@@ -31,6 +35,13 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_job_hunter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:

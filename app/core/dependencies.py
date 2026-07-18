@@ -6,7 +6,9 @@ from app.core.jwt import decode_access_token
 from app.database.session import get_db
 from app.database.user_repository import UserRepository
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login"
+)
 
 
 def get_current_user(
@@ -18,19 +20,20 @@ def get_current_user(
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="Invalid authentication credentials",
         )
 
-    email = payload.get("sub")
+    user_id = payload.get("user_id")
 
-    if email is None:
+    if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="Invalid authentication credentials",
         )
 
     repo = UserRepository(db)
-    user = repo.get_by_email(email)
+
+    user = repo.get(user_id)
 
     if user is None:
         raise HTTPException(
