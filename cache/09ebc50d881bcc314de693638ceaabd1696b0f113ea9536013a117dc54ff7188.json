@@ -1,0 +1,56 @@
+{
+    "name": "Aadhithyan Mahadevan",
+    "title": "Java Backend Developer",
+    "years_of_experience": "2",
+    "skills": [
+        "Java 8",
+        "Spring Boot",
+        "Microservices",
+        "REST API",
+        "Apache Kafka",
+        "Apache Solr",
+        "AWS (EC2, S3, Lambda)",
+        "Docker",
+        "Jenkins",
+        "MySQL",
+        "MongoDB",
+        "Python",
+        "Robot Framework",
+        "JavaScript (ES6+)",
+        "HTML5/CSS3",
+        "Maven",
+        "JUnit",
+        "Log4J2",
+        "Hibernate",
+        "Figma",
+        "Grafana",
+        "Power BI"
+    ],
+    "education": [
+        "M.Tech in Computer Science Engineering, Sri Krishna College of Engineering and Technology (CGPA: 8.51/10, 2019 - 2024)"
+    ],
+    "certifications": [
+        "AWS Certified Cloud Practitioner",
+        "AWS Certified AI Practitioner"
+    ],
+    "projects": [
+        "Grocery Inventory Management System",
+        "Automated Test Analysis & Reporting System",
+        "Stock Price Prediction System"
+    ],
+    "strengths": [
+        "Process Automation (reduced manual reporting effort by 80%)",
+        "Query Optimization & Database Performance Tuning",
+        "Event-Driven Architecture & Real-Time Search Indexing",
+        "Dual AWS Cloud Certifications",
+        "Full-Stack Development & UI/UX Design integration"
+    ],
+    "missing_skills": [
+        "Kubernetes",
+        "Redis (Caching)",
+        "Spring Security",
+        "NoSQL (Cassandra/DynamoDB)",
+        "System Design / High-Level Architecture",
+        "Terraform (IaC)"
+    ]
+}
